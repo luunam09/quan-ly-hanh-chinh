@@ -1,0 +1,131 @@
+@model StudentAdminPortal.ViewModels.StudentProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Hồ Sơ & Thông Tin Cá Nhân</h1>
+            <p class="text-xs text-slate-500 mt-1">Cập nhật thông tin liên hệ và quản lý bảo mật tài khoản của bạn</p>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-bold border border-brand-200">
+            <i data-lucide="badge-check" class="w-4 h-4"></i>
+            Tài khoản: @Model.Username
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <form asp-controller="Account" asp-action="Profile" method="post" class="p-6 sm:p-8 space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="Username" />
+
+            <!-- Academic Info (Readonly) -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 sm:p-5">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Thông Tin Học Vụ (Do Nhà Trường Quản Lý)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Mã số sinh viên (MSSV):</span>
+                        <span class="font-mono font-bold text-brand-700 text-sm">@Model.Username</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Lớp sinh hoạt:</span>
+                        <span class="font-bold text-slate-800">@(Model.ClassName ?? "Chưa phân lớp")</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block mb-0.5">Khoa / Viện đào tạo:</span>
+                        <span class="font-bold text-slate-800">@(Model.Faculty ?? "Chưa phân khoa")</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editable Profile Fields -->
+            <div>
+                <h3 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <i data-lucide="user-edit" class="w-4 h-4 text-brand-600"></i>
+                    Thông Tin Cá Nhân & Liên Hệ
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="FullName" class="block text-xs font-bold text-slate-700 mb-1">Họ và tên sinh viên</label>
+                        <input asp-for="FullName" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" required />
+                        <span asp-validation-for="FullName" class="text-[11px] text-rose-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Email" class="block text-xs font-bold text-slate-700 mb-1">Địa chỉ Email</label>
+                        <input asp-for="Email" type="email" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <span asp-validation-for="Email" class="text-[11px] text-rose-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="PhoneNumber" class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại liên lạc</label>
+                        <input asp-for="PhoneNumber" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <span asp-validation-for="PhoneNumber" class="text-[11px] text-rose-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="CccdNumber" class="block text-xs font-bold text-slate-700 mb-1">Số CCCD / CMND</label>
+                        <input asp-for="CccdNumber" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                    </div>
+
+                    <div>
+                        <label asp-for="DateOfBirth" class="block text-xs font-bold text-slate-700 mb-1">Ngày sinh</label>
+                        <input asp-for="DateOfBirth" type="date" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                    </div>
+
+                    <div>
+                        <label asp-for="Gender" class="block text-xs font-bold text-slate-700 mb-1">Giới tính</label>
+                        <select asp-for="Gender" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label asp-for="Address" class="block text-xs font-bold text-slate-700 mb-1">Địa chỉ thường trú / Nơi ở hiện tại</label>
+                        <input asp-for="Address" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Change Section -->
+            <div class="pt-4 border-t border-slate-200">
+                <h3 class="text-sm font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <i data-lucide="key-round" class="w-4 h-4 text-brand-600"></i>
+                    Đổi Mật Khẩu (Để trống nếu không thay đổi)
+                </h3>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label asp-for="CurrentPassword" class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu hiện tại</label>
+                        <input asp-for="CurrentPassword" type="password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <span asp-validation-for="CurrentPassword" class="text-[11px] text-rose-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="NewPassword" class="block text-xs font-bold text-slate-700 mb-1">Mật khẩu mới</label>
+                        <input asp-for="NewPassword" type="password" placeholder="Tối thiểu 6 ký tự" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <span asp-validation-for="NewPassword" class="text-[11px] text-rose-600"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="ConfirmPassword" class="block text-xs font-bold text-slate-700 mb-1">Xác nhận mật khẩu</label>
+                        <input asp-for="ConfirmPassword" type="password" placeholder="Nhập lại mật khẩu mới" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                        <span asp-validation-for="ConfirmPassword" class="text-[11px] text-rose-600"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 flex justify-end">
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition shadow-sm flex items-center gap-2">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Lưu thay đổi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

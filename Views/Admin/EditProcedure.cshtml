@@ -1,0 +1,73 @@
+@model StudentAdminPortal.Models.Procedure
+@{
+    ViewData["Title"] = $"Chỉnh sửa thủ tục {Model.Code}";
+}
+
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex items-center gap-2 text-xs text-slate-500">
+        <a asp-controller="Admin" asp-action="Dashboard" class="hover:text-brand-600">Bảng điều khiển</a>
+        <span>&bull;</span>
+        <a asp-controller="Admin" asp-action="Procedures" class="hover:text-brand-600">Thủ tục</a>
+        <span>&bull;</span>
+        <span class="text-slate-900 font-bold font-mono">@Model.Code</span>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-900">Chỉnh Sửa Thủ Tục Hành Chính</h1>
+            <p class="text-xs text-slate-400 mt-0.5">Cập nhật nội dung, thời gian xử lý hoặc hướng dẫn nộp giấy tờ</p>
+        </div>
+
+        <form asp-controller="Admin" asp-action="EditProcedure" asp-route-id="@Model.Id" method="post" class="space-y-4 text-xs">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label asp-for="Code" class="block font-bold text-slate-700 mb-1">Mã thủ tục <span class="text-rose-500">*</span></label>
+                    <input asp-for="Code" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase" required />
+                    <span asp-validation-for="Code" class="text-rose-600 text-[11px]"></span>
+                </div>
+
+                <div>
+                    <label asp-for="ProcessingDays" class="block font-bold text-slate-700 mb-1">Thời gian xử lý dự kiến (Ngày làm việc) <span class="text-rose-500">*</span></label>
+                    <input asp-for="ProcessingDays" type="number" min="1" max="30" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" required />
+                    <span asp-validation-for="ProcessingDays" class="text-rose-600 text-[11px]"></span>
+                </div>
+            </div>
+
+            <div>
+                <label asp-for="Name" class="block font-bold text-slate-700 mb-1">Tên thủ tục hành chính <span class="text-rose-500">*</span></label>
+                <input asp-for="Name" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" required />
+                <span asp-validation-for="Name" class="text-rose-600 text-[11px]"></span>
+            </div>
+
+            <div>
+                <label asp-for="Description" class="block font-bold text-slate-700 mb-1">Mục đích & Mô tả chi tiết thủ tục</label>
+                <textarea asp-for="Description" rows="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+
+            <div>
+                <label asp-for="RequiredDocuments" class="block font-bold text-slate-700 mb-1">Giấy tờ & Hồ sơ yêu cầu sinh viên đính kèm</label>
+                <textarea asp-for="RequiredDocuments" rows="4" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500"></textarea>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+                <input asp-for="IsActive" type="checkbox" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                <label asp-for="IsActive" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                    Đang mở tiếp nhận trực tuyến
+                </label>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a asp-controller="Admin" asp-action="Procedures" class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="px-6 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition shadow-sm flex items-center gap-1.5">
+                    <i data-lucide="save" class="w-4 h-4"></i>
+                    <span>Lưu cập nhật</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

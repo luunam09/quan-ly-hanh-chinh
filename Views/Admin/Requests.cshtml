@@ -1,0 +1,154 @@
+@model StudentAdminPortal.ViewModels.RequestListFilterViewModel
+@{
+    ViewData["Title"] = "Quản lý hồ sơ hành chính";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Quản Lý & Tiếp Nhận Hồ Sơ Sinh Viên</h1>
+            <p class="text-xs text-slate-500 mt-1">Danh sách tập trung toàn bộ yêu cầu hành chính gửi đến phòng Một Cửa</p>
+        </div>
+        <div class="text-xs font-bold text-slate-600 bg-slate-100 px-3.5 py-2 rounded-xl">
+            Tổng cộng: @Model.Requests.Count hồ sơ
+        </div>
+    </div>
+
+    <!-- Filter Bar Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <form asp-controller="Admin" asp-action="Requests" method="get" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+            <!-- Search Keyword -->
+            <div class="lg:col-span-2">
+                <label class="block font-bold text-slate-700 mb-1">Tìm kiếm từ khóa</label>
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" name="search" value="@Model.Search" placeholder="Mã hồ sơ, MSSV, Họ tên sinh viên..." class="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                </div>
+            </div>
+
+            <!-- Filter Status -->
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Trạng thái hồ sơ</label>
+                <select name="status" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="@RequestStatus.Pending" selected="@(Model.Status == RequestStatus.Pending)">Chờ tiếp nhận</option>
+                    <option value="@RequestStatus.Processing" selected="@(Model.Status == RequestStatus.Processing)">Đang xử lý</option>
+                    <option value="@RequestStatus.NeedUpdate" selected="@(Model.Status == RequestStatus.NeedUpdate)">Yêu cầu bổ sung</option>
+                    <option value="@RequestStatus.Approved" selected="@(Model.Status == RequestStatus.Approved)">Đã phê duyệt</option>
+                    <option value="@RequestStatus.Rejected" selected="@(Model.Status == RequestStatus.Rejected)">Đã từ chối</option>
+                </select>
+            </div>
+
+            <!-- Filter Procedure -->
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Loại thủ tục</label>
+                <select name="procedureId" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">-- Tất cả thủ tục --</option>
+                    @foreach (var p in Model.Procedures)
+                    {
+                        <option value="@p.Id" selected="@(Model.ProcedureId == p.Id)">@p.Name</option>
+                    }
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-end gap-2">
+                <button type="submit" class="flex-1 py-2 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-xs flex items-center justify-center gap-1.5">
+                    <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                    <span>Lọc</span>
+                </button>
+                <a asp-controller="Admin" asp-action="Requests" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition">
+                    Đặt lại
+                </a>
+            </div>
+        </form>
+
+        <!-- Quick Status Pills -->
+        <div class="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 text-xs">
+            <span class="text-slate-400 font-medium">Lọc nhanh:</span>
+            <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Pending" class="px-2.5 py-1 rounded-lg text-xs font-bold @(Model.Status == RequestStatus.Pending ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-700 hover:bg-amber-100")">
+                Chờ tiếp nhận
+            </a>
+            <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Processing" class="px-2.5 py-1 rounded-lg text-xs font-bold @(Model.Status == RequestStatus.Processing ? "bg-blue-600 text-white" : "bg-blue-50 text-blue-700 hover:bg-blue-100")">
+                Đang xử lý
+            </a>
+            <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.NeedUpdate" class="px-2.5 py-1 rounded-lg text-xs font-bold @(Model.Status == RequestStatus.NeedUpdate ? "bg-rose-600 text-white" : "bg-rose-50 text-rose-700 hover:bg-rose-100")">
+                Cần bổ sung
+            </a>
+            <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Approved" class="px-2.5 py-1 rounded-lg text-xs font-bold @(Model.Status == RequestStatus.Approved ? "bg-emerald-600 text-white" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100")">
+                Đã duyệt
+            </a>
+        </div>
+    </div>
+
+    <!-- Requests Table -->
+    @if (Model.Requests.Count > 0)
+    {
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                        <tr>
+                            <th class="px-6 py-4">Mã YC</th>
+                            <th class="px-6 py-4">Sinh viên yêu cầu</th>
+                            <th class="px-6 py-4">Thủ tục hành chính</th>
+                            <th class="px-6 py-4">Ngày nộp</th>
+                            <th class="px-6 py-4">Hạn xử lý</th>
+                            <th class="px-6 py-4">Trạng thái</th>
+                            <th class="px-6 py-4 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var item in Model.Requests)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-6 py-4 font-mono font-bold text-brand-700 whitespace-nowrap">
+                                    <a asp-controller="Admin" asp-action="Review" asp-route-id="@item.Id" class="hover:underline">
+                                        @item.RequestCode
+                                    </a>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-bold text-slate-900">@item.Student?.FullName</div>
+                                    <div class="text-[11px] text-slate-400">
+                                        MSSV: @item.Student?.Username &bull; @item.Student?.ClassName
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-slate-900">@item.Procedure?.Name</div>
+                                    <div class="text-[11px] text-slate-400 mt-0.5 line-clamp-1">@item.Purpose</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-slate-500">
+                                    @item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-slate-500">
+                                    @(item.ExpectedDate?.ToString("dd/MM/yyyy") ?? "--")
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="@RequestStatus.ToBadgeClass(item.Status) px-2.5 py-1 rounded-full text-[11px] font-bold">
+                                        @RequestStatus.ToVietnamese(item.Status)
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <a asp-controller="Admin" asp-action="Review" asp-route-id="@item.Id" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-2xs">
+                                        <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                                        <span>Thẩm định</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                <i data-lucide="inbox" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Không tìm thấy hồ sơ nào</h3>
+            <p class="text-xs text-slate-400">Thử thay đổi bộ lọc tìm kiếm hoặc từ khóa.</p>
+        </div>
+    }
+</div>

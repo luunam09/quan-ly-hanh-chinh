@@ -1,0 +1,213 @@
+@model StudentAdminPortal.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Bảng điều khiển Quản trị viên";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <!-- Admin Header Banner -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200 mb-2">
+                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                Phân hệ Cán bộ Quản trị & Một Cửa
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Thống Kê & Bảng Điều Khiển Hồ Sơ</h1>
+            <p class="text-xs text-slate-500 mt-1">Tổng quan hoạt động tiếp nhận, tiến độ giải quyết thủ tục hành chính sinh viên</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Pending" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition shadow-sm">
+                <i data-lucide="inbox" class="w-4 h-4"></i>
+                <span>Xem @Model.PendingRequests hồ sơ chờ duyệt</span>
+            </a>
+            <a asp-controller="Admin" asp-action="CreateProcedure" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-sm">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Thêm thủ tục mới</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- KPI Metric Cards Grid -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <a asp-controller="Admin" asp-action="Requests" class="bg-white border border-slate-200 rounded-2xl p-4 hover:border-brand-500 hover:shadow-md transition">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block">Tổng hồ sơ</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1">@Model.TotalRequests</div>
+            <span class="text-[10px] text-slate-400">Tất cả thủ tục</span>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Pending" class="bg-white border border-amber-200 rounded-2xl p-4 hover:border-amber-500 hover:shadow-md transition bg-amber-50/20">
+            <span class="text-[11px] font-bold text-amber-700 uppercase block">Chờ tiếp nhận</span>
+            <div class="text-2xl font-extrabold text-amber-600 mt-1">@Model.PendingRequests</div>
+            <span class="text-[10px] text-amber-600/80 font-medium">Cần xử lý ngay</span>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Processing" class="bg-white border border-blue-200 rounded-2xl p-4 hover:border-blue-500 hover:shadow-md transition bg-blue-50/20">
+            <span class="text-[11px] font-bold text-blue-700 uppercase block">Đang xử lý</span>
+            <div class="text-2xl font-extrabold text-blue-600 mt-1">@Model.ProcessingRequests</div>
+            <span class="text-[10px] text-blue-600/80 font-medium">Đang thẩm định</span>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.NeedUpdate" class="bg-white border border-rose-200 rounded-2xl p-4 hover:border-rose-500 hover:shadow-md transition bg-rose-50/20">
+            <span class="text-[11px] font-bold text-rose-700 uppercase block">Cần bổ sung</span>
+            <div class="text-2xl font-extrabold text-rose-600 mt-1">@Model.NeedUpdateRequests</div>
+            <span class="text-[10px] text-rose-600/80 font-medium">Chờ SV gửi thêm</span>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Approved" class="bg-white border border-emerald-200 rounded-2xl p-4 hover:border-emerald-500 hover:shadow-md transition bg-emerald-50/20">
+            <span class="text-[11px] font-bold text-emerald-700 uppercase block">Đã duyệt</span>
+            <div class="text-2xl font-extrabold text-emerald-600 mt-1">@Model.ApprovedRequests</div>
+            <span class="text-[10px] text-emerald-600/80 font-medium">Đã trả kết quả</span>
+        </a>
+
+        <a asp-controller="Admin" asp-action="Requests" asp-route-status="@RequestStatus.Rejected" class="bg-white border border-slate-200 rounded-2xl p-4 hover:border-slate-500 hover:shadow-md transition">
+            <span class="text-[11px] font-bold text-slate-500 uppercase block">Đã từ chối</span>
+            <div class="text-2xl font-extrabold text-slate-600 mt-1">@Model.RejectedRequests</div>
+            <span class="text-[10px] text-slate-400">Không đủ điều kiện</span>
+        </a>
+    </div>
+
+    <!-- Secondary Metrics (Students & Procedures) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-r from-brand-900 to-indigo-900 text-white rounded-2xl p-5 flex items-center justify-between shadow-md">
+            <div>
+                <span class="text-xs text-brand-200 uppercase font-bold tracking-wider">Hồ sơ sinh viên quản lý</span>
+                <div class="text-3xl font-extrabold mt-1">@Model.TotalStudents Sinh viên</div>
+                <p class="text-xs text-slate-300 mt-1">Được cấp tài khoản trên cổng một cửa</p>
+            </div>
+            <a asp-controller="Admin" asp-action="Students" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/20">
+                Quản lý &rarr;
+            </a>
+        </div>
+
+        <div class="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-5 flex items-center justify-between shadow-md">
+            <div>
+                <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Danh mục quy trình thủ tục</span>
+                <div class="text-3xl font-extrabold mt-1">@Model.TotalProcedures Thủ tục</div>
+                <p class="text-xs text-slate-300 mt-1">Đang tiếp nhận và giải quyết trực tuyến</p>
+            </div>
+            <a asp-controller="Admin" asp-action="Procedures" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/20">
+                Cấu hình &rarr;
+            </a>
+        </div>
+    </div>
+
+    <!-- Urgent Requests Table (Needs attention) -->
+    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs space-y-4 p-6 sm:p-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="bell-ring" class="w-5 h-5 text-amber-500"></i>
+                    Hồ Sơ Cần Thẩm Định Xử Lý Ngay
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Các hồ sơ đang ở trạng thái Chờ tiếp nhận và Đang xử lý</p>
+            </div>
+            <a asp-controller="Admin" asp-action="Requests" class="text-xs font-bold text-brand-600 hover:text-brand-700">
+                Xem toàn bộ hồ sơ &rarr;
+            </a>
+        </div>
+
+        @if (Model.UrgentRequests.Count > 0)
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                        <tr>
+                            <th class="px-4 py-3">Mã YC</th>
+                            <th class="px-4 py-3">Sinh viên</th>
+                            <th class="px-4 py-3">Thủ tục yêu cầu</th>
+                            <th class="px-4 py-3">Thời gian nộp</th>
+                            <th class="px-4 py-3">Trạng thái</th>
+                            <th class="px-4 py-3 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var r in Model.UrgentRequests)
+                        {
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-4 py-3 font-mono font-bold text-brand-700 whitespace-nowrap">@r.RequestCode</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div class="font-bold text-slate-900">@r.Student?.FullName</div>
+                                    <div class="text-[10px] text-slate-400">@r.Student?.Username - @r.Student?.ClassName</div>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <div class="font-medium text-slate-800 line-clamp-1">@r.Procedure?.Name</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-400">
+                                    @r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="@RequestStatus.ToBadgeClass(r.Status) px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                        @RequestStatus.ToVietnamese(r.Status)
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    <a asp-controller="Admin" asp-action="Review" asp-route-id="@r.Id" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-2xs">
+                                        <span>Thẩm định</span>
+                                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="py-8 text-center text-xs text-slate-400">
+                Hiện tại không có hồ sơ nào tồn đọng cần xử lý khẩn cấp!
+            </div>
+        }
+    </div>
+
+    <!-- Charts / Statistical Breakdown Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Breakdown by Procedure -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="pie-chart" class="w-4 h-4 text-brand-600"></i>
+                Thống Kê Hồ Sơ Theo Từng Thủ Tục
+            </h3>
+
+            <div class="space-y-3 pt-2">
+                @foreach (var item in Model.RequestsByProcedure)
+                {
+                    double percent = Model.TotalRequests > 0 ? (double)item.Value / Model.TotalRequests * 100 : 0;
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-700 truncate max-w-xs">@item.Key</span>
+                            <span class="font-bold text-slate-900">@item.Value hồ sơ (@percent.ToString("N0")%)</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div class="h-full bg-brand-600 rounded-full" style="width: @percent%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Breakdown by Faculty -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-4">
+            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <i data-lucide="building" class="w-4 h-4 text-brand-600"></i>
+                Thống Kê Nhu Cầu Theo Khoa / Viện
+            </h3>
+
+            <div class="space-y-3 pt-2">
+                @foreach (var item in Model.RequestsByFaculty)
+                {
+                    double percent = Model.TotalRequests > 0 ? (double)item.Value / Model.TotalRequests * 100 : 0;
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-medium text-slate-700">@item.Key</span>
+                            <span class="font-bold text-slate-900">@item.Value sinh viên (@percent.ToString("N0")%)</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                            <div class="h-full bg-indigo-600 rounded-full" style="width: @percent%"></div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

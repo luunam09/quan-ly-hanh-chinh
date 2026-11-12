@@ -1,0 +1,209 @@
+@using System.Security.Claims
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Cổng Hành Chính Sinh Viên</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS (Play CDN with full plugins) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                            950: '#172554',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        @@media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand / Logo -->
+                <div class="flex items-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="flex items-center gap-2.5 group">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+                            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <span class="block text-base font-extrabold text-slate-900 leading-tight tracking-tight">HÀNH CHÍNH SINH VIÊN</span>
+                            <span class="block text-xs font-semibold text-brand-600 uppercase tracking-wider">Cổng Dịch Vụ Một Cửa</span>
+                        </div>
+                    </a>
+
+                    <!-- Main Navigation Links -->
+                    <nav class="hidden md:flex items-center gap-1 ml-8">
+                        @if (!User.Identity?.IsAuthenticated ?? true)
+                        {
+                            <a asp-controller="Home" asp-action="Index" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100/70 transition">Trang chủ</a>
+                            <a asp-controller="Home" asp-action="Lookup" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-600 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="search" class="w-4 h-4"></i> Tra cứu hồ sơ
+                            </a>
+                        }
+                        else if (User.IsInRole("Student"))
+                        {
+                            <a asp-controller="Student" asp-action="Dashboard" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="layout-dashboard" class="w-4 h-4"></i> Tổng quan
+                            </a>
+                            <a asp-controller="Student" asp-action="Procedures" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="file-plus" class="w-4 h-4"></i> Nộp hồ sơ mới
+                            </a>
+                            <a asp-controller="Student" asp-action="MyRequests" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="list-checks" class="w-4 h-4"></i> Hồ sơ của tôi
+                            </a>
+                            <a asp-controller="Home" asp-action="Lookup" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="search" class="w-4 h-4"></i> Tra cứu
+                            </a>
+                        }
+                        else if (User.IsInRole("Admin"))
+                        {
+                            <a asp-controller="Admin" asp-action="Dashboard" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Thống kê
+                            </a>
+                            <a asp-controller="Admin" asp-action="Requests" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="inbox" class="w-4 h-4"></i> Xử lý hồ sơ
+                            </a>
+                            <a asp-controller="Admin" asp-action="Procedures" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="folder-cog" class="w-4 h-4"></i> Quản lý thủ tục
+                            </a>
+                            <a asp-controller="Admin" asp-action="Students" class="px-3.5 py-2 text-sm font-medium rounded-lg text-slate-700 hover:text-brand-600 hover:bg-slate-100/70 transition flex items-center gap-1.5">
+                                <i data-lucide="users" class="w-4 h-4"></i> Sinh viên
+                            </a>
+                        }
+                    </nav>
+                </div>
+
+                <!-- Right Side Actions / User Profile -->
+                <div class="flex items-center gap-3">
+                    @if (User.Identity?.IsAuthenticated ?? false)
+                    {
+                        var role = User.FindFirstValue(ClaimTypes.Role);
+                        var fullName = User.FindFirst("FullName")?.Value ?? User.Identity.Name;
+                        var username = User.Identity.Name;
+
+                        <div class="flex items-center gap-3 border-l border-slate-200 pl-4">
+                            <div class="hidden sm:block text-right">
+                                <div class="text-sm font-bold text-slate-900 leading-tight">@fullName</div>
+                                <div class="text-xs font-semibold text-slate-500 flex items-center justify-end gap-1">
+                                    @if (role == "Admin")
+                                    {
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">CÁN BỘ CTSV</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-brand-100 text-brand-800">MSSV: @username</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <a asp-controller="Account" asp-action="Profile" title="Xem thông tin cá nhân" class="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 hover:border-brand-500 flex items-center justify-center text-slate-700 hover:text-brand-600 transition">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </a>
+
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" title="Đăng xuất" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition">
+                                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                                    <span class="hidden sm:inline">Thoát</span>
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="Home" asp-action="Lookup" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2">
+                            <i data-lucide="search" class="w-4 h-4"></i> Tra cứu
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white bg-brand-600 hover:bg-brand-700 shadow-sm shadow-brand-500/30 transition">
+                            <i data-lucide="log-in" class="w-4 h-4"></i>
+                            <span>Đăng nhập</span>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alert / Toast Messages -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-4 no-print">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-4 flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm shadow-xs animate-in fade-in">
+                <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 shrink-0"></i>
+                <div class="font-medium">@TempData["SuccessMessage"]</div>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="mb-4 flex items-center gap-3 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm shadow-xs animate-in fade-in">
+                <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 shrink-0"></i>
+                <div class="font-medium">@TempData["ErrorMessage"]</div>
+            </div>
+        }
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 pb-16">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-8 text-slate-500 text-sm no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-md bg-brand-600 text-white flex items-center justify-center font-bold text-xs">SV</div>
+                <span class="font-semibold text-slate-700">Hệ Thống Quản Lý Hành Chính Sinh Viên</span>
+                <span class="text-slate-400">| Phòng Công Tác Sinh Viên & Một Cửa</span>
+            </div>
+            <div class="text-xs text-slate-400">
+                &copy; 2026 Đại học Quốc gia. Phát triển trên nền tảng .NET 10 (C#) & Tailwind CSS.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

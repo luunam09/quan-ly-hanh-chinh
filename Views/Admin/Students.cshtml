@@ -1,0 +1,118 @@
+@model List<StudentAdminPortal.Models.User>
+@{
+    ViewData["Title"] = "Quản lý danh sách sinh viên";
+    var faculties = ViewBag.Faculties as List<string> ?? new();
+    string? searchTerm = ViewBag.SearchTerm as string;
+    string? selectedFaculty = ViewBag.SelectedFaculty as string;
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Danh Sách & Quản Lý Sinh Viên</h1>
+            <p class="text-xs text-slate-500 mt-1">Tra cứu lý lịch, tình trạng tài khoản và lịch sử nộp hồ sơ của sinh viên</p>
+        </div>
+        <div class="text-xs font-bold text-slate-600 bg-slate-100 px-3.5 py-2 rounded-xl">
+            Tổng cộng: @Model.Count sinh viên
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <form asp-controller="Admin" asp-action="Students" method="get" class="flex flex-col sm:flex-row gap-3 text-xs">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" name="search" value="@searchTerm" placeholder="Tìm theo MSSV, Họ tên, Lớp sinh hoạt..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            </div>
+
+            <div class="sm:w-64">
+                <select name="faculty" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+                    <option value="">-- Tất cả Khoa / Viện --</option>
+                    @foreach (var fac in faculties)
+                    {
+                        <option value="@fac" selected="@(selectedFaculty == fac)">@fac</option>
+                    }
+                </select>
+            </div>
+
+            <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold transition flex items-center justify-center gap-1.5 shadow-xs">
+                <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                <span>Tìm kiếm</span>
+            </button>
+
+            @if (!string.IsNullOrEmpty(searchTerm) || !string.IsNullOrEmpty(selectedFaculty))
+            {
+                <a asp-controller="Admin" asp-action="Students" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold transition flex items-center justify-center">
+                    Đặt lại
+                </a>
+            }
+        </form>
+    </div>
+
+    <!-- Students Table -->
+    @if (Model.Count > 0)
+    {
+        <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                        <tr>
+                            <th class="px-6 py-4">Mã số SV (MSSV)</th>
+                            <th class="px-6 py-4">Họ và tên</th>
+                            <th class="px-6 py-4">Lớp sinh hoạt</th>
+                            <th class="px-6 py-4">Khoa / Viện</th>
+                            <th class="px-6 py-4">Số điện thoại / Email</th>
+                            <th class="px-6 py-4">Hồ sơ đã nộp</th>
+                            <th class="px-6 py-4 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var s in Model)
+                        {
+                            <tr class="hover:bg-slate-50/80 transition">
+                                <td class="px-6 py-4 font-mono font-bold text-brand-700 whitespace-nowrap">
+                                    @s.Username
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="font-bold text-slate-900 text-sm">@s.FullName</div>
+                                    <div class="text-[10px] text-slate-400">CCCD: @(s.CccdNumber ?? "--")</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap font-semibold text-slate-800">
+                                    @(s.ClassName ?? "--")
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-slate-600">
+                                    @(s.Faculty ?? "--")
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-slate-500">
+                                    <div>@(s.PhoneNumber ?? "--")</div>
+                                    <div class="text-[11px] text-slate-400">@(s.Email ?? "--")</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                                        @s.Requests.Count hồ sơ
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                    <a asp-controller="Admin" asp-action="StudentDetails" asp-route-id="@s.Id" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold transition">
+                                        <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                        <span>Lý lịch & Hồ sơ</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+                <i data-lucide="user-x" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800">Không tìm thấy sinh viên nào</h3>
+            <p class="text-xs text-slate-400">Không có kết quả phù hợp với tiêu chí tìm kiếm.</p>
+        </div>
+    }
+</div>

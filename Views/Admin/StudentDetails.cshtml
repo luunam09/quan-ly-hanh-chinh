@@ -1,0 +1,136 @@
+@model StudentAdminPortal.Models.User
+@{
+    ViewData["Title"] = $"Hồ sơ sinh viên {Model.FullName}";
+}
+
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs text-slate-500">
+            <a asp-controller="Admin" asp-action="Dashboard" class="hover:text-brand-600">Bảng điều khiển</a>
+            <span>&bull;</span>
+            <a asp-controller="Admin" asp-action="Students" class="hover:text-brand-600">Sinh viên</a>
+            <span>&bull;</span>
+            <span class="text-slate-900 font-bold font-mono">@Model.Username</span>
+        </div>
+
+        <a asp-controller="Admin" asp-action="Students" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Quay lại danh sách</span>
+        </a>
+    </div>
+
+    <!-- Student Dossier Card -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-100 gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-700 to-brand-500 text-white flex items-center justify-center font-extrabold text-2xl shadow-md">
+                    @Model.FullName.Substring(0, 1)
+                </div>
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-900">@Model.FullName</h1>
+                    <div class="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                        <span class="font-mono font-bold text-brand-700">MSSV: @Model.Username</span>
+                        <span>&bull;</span>
+                        <span>Lớp: <strong>@Model.ClassName</strong></span>
+                        <span>&bull;</span>
+                        <span>Khoa: <strong>@Model.Faculty</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold @(Model.IsActive ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800")">
+                <span class="w-2 h-2 rounded-full @(Model.IsActive ? "bg-emerald-500" : "bg-rose-500")"></span>
+                @(Model.IsActive ? "Tài khoản đang hoạt động" : "Tài khoản bị khóa")
+            </span>
+        </div>
+
+        <!-- Detailed Attributes Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-400 block mb-1">Số CCCD / CMND:</span>
+                <span class="font-mono font-bold text-slate-800">@(Model.CccdNumber ?? "--")</span>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-400 block mb-1">Ngày sinh & Giới tính:</span>
+                <span class="font-semibold text-slate-800">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "--") (@(Model.Gender ?? "--"))</span>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-400 block mb-1">Số điện thoại:</span>
+                <span class="font-mono font-bold text-slate-800">@(Model.PhoneNumber ?? "--")</span>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-400 block mb-1">Email sinh viên:</span>
+                <span class="font-mono font-medium text-slate-800 truncate block">@(Model.Email ?? "--")</span>
+            </div>
+            <div class="sm:col-span-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <span class="text-slate-400 block mb-1">Địa chỉ thường trú / Nơi ở hiện tại:</span>
+                <span class="font-medium text-slate-800">@(Model.Address ?? "--")</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Request History Table -->
+    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs space-y-4 p-6 sm:p-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="history" class="w-5 h-5 text-brand-600"></i>
+                    Toàn Bộ Lịch Sử Yêu Cầu Của Sinh Viên (@Model.Requests.Count)
+                </h3>
+            </div>
+        </div>
+
+        @if (Model.Requests.Count > 0)
+        {
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-600">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
+                        <tr>
+                            <th class="px-4 py-3">Mã YC</th>
+                            <th class="px-4 py-3">Thủ tục hành chính</th>
+                            <th class="px-4 py-3">Ngày nộp</th>
+                            <th class="px-4 py-3">Hạn dự kiến</th>
+                            <th class="px-4 py-3">Trạng thái</th>
+                            <th class="px-4 py-3 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var r in Model.Requests.OrderByDescending(x => x.CreatedAt))
+                        {
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-4 py-3 font-mono font-bold text-brand-700 whitespace-nowrap">@r.RequestCode</td>
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-slate-900">@r.Procedure?.Name</div>
+                                    <div class="text-[11px] text-slate-400 line-clamp-1">@r.Purpose</div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-400">
+                                    @r.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-slate-400">
+                                    @(r.ExpectedDate?.ToString("dd/MM/yyyy") ?? "--")
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <span class="@RequestStatus.ToBadgeClass(r.Status) px-2 py-0.5 rounded-full text-[10px] font-bold">
+                                        @RequestStatus.ToVietnamese(r.Status)
+                                    </span>
+                                </td>
+                                <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    <a asp-controller="Admin" asp-action="Review" asp-route-id="@r.Id" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition shadow-2xs">
+                                        <span>Xem & Thẩm định</span>
+                                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="py-8 text-center text-xs text-slate-400">
+                Sinh viên này chưa nộp hồ sơ yêu cầu nào.
+            </div>
+        }
+    </div>
+</div>

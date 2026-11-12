@@ -1,0 +1,169 @@
+@model StudentAdminPortal.Models.AdministrativeRequest?
+@{
+    ViewData["Title"] = "Tra cứu tiến độ hồ sơ hành chính";
+    string? searchCode = ViewBag.SearchCode as string;
+    string? qrCodeBase64 = ViewBag.QrCodeBase64 as string;
+}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="text-center max-w-xl mx-auto space-y-3 mb-8">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            Hệ Thống Tra Cứu & Xác Thực Văn Bản Điện Tử
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">Tra Cứu Hồ Sơ & Kết Quả Trực Tuyến</h1>
+        <p class="text-sm text-slate-500">Nhập mã hồ sơ (Mã YC) ghi trên biên nhận điện tử để kiểm tra tiến độ giải quyết</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm mb-8">
+        <form asp-controller="Home" asp-action="Lookup" method="get" class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+                <i data-lucide="hash" class="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" name="requestCode" value="@searchCode" placeholder="Nhập mã hồ sơ (VD: YC-2026-0001)" class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 uppercase font-mono font-medium" required />
+            </div>
+            <button type="submit" class="px-6 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm transition shadow-sm flex items-center justify-center gap-2">
+                <i data-lucide="search" class="w-4 h-4"></i>
+                <span>Kiểm tra trạng thái</span>
+            </button>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(searchCode))
+    {
+        @if (Model != null)
+        {
+            <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm space-y-6 p-6 sm:p-8">
+                <!-- Header Info -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg font-mono font-extrabold text-brand-700">@Model.RequestCode</span>
+                            <span class="@RequestStatus.ToBadgeClass(Model.Status) px-3 py-1 rounded-full text-xs font-bold">
+                                @RequestStatus.ToVietnamese(Model.Status)
+                            </span>
+                        </div>
+                        <h2 class="text-xl font-bold text-slate-900 mt-1">@Model.Procedure?.Name</h2>
+                        <div class="text-xs text-slate-500 mt-1">
+                            Ngày nộp: @Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm") &bull; Dự kiến xử lý: @(Model.ExpectedDate?.ToString("dd/MM/yyyy") ?? "Đang cập nhật")
+                        </div>
+                    </div>
+
+                    @if (Model.Status == RequestStatus.Approved && !string.IsNullOrEmpty(qrCodeBase64))
+                    {
+                        <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                            <img src="@qrCodeBase64" alt="QR Code" class="w-16 h-16 rounded-md bg-white p-1 border border-emerald-300" />
+                            <div class="text-xs">
+                                <div class="font-bold text-emerald-800">Văn bản hợp lệ</div>
+                                <div class="font-mono text-[11px] text-emerald-600">@Model.VerificationCode</div>
+                                <div class="text-[10px] text-slate-500">Đã ký số điện tử</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Applicant Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+                    <div>
+                        <span class="text-slate-400 block">Sinh viên yêu cầu:</span>
+                        <span class="font-bold text-slate-800 text-sm">@Model.Student?.FullName</span>
+                        <span class="text-slate-500 block">MSSV: @Model.Student?.Username</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Lớp & Khoa:</span>
+                        <span class="font-semibold text-slate-800">@Model.Student?.ClassName</span>
+                        <span class="text-slate-500 block">@Model.Student?.Faculty</span>
+                    </div>
+                    <div>
+                        <span class="text-slate-400 block">Hình thức nhận:</span>
+                        <span class="font-semibold text-slate-800">
+                            @(Model.ReceiveMethod == "Digital" ? "Bản điện tử trực tuyến" : "Nhận bản cứng tại phòng Một Cửa")
+                        </span>
+                        <span class="text-slate-500 block">Số lượng: @Model.Quantity bản</span>
+                    </div>
+                </div>
+
+                <!-- Admin feedback or result note -->
+                @if (!string.IsNullOrEmpty(Model.AdminFeedback) || !string.IsNullOrEmpty(Model.ResultNote))
+                {
+                    <div class="p-4 rounded-xl bg-blue-50/80 border border-blue-200/80 space-y-2">
+                        <div class="flex items-center gap-2 text-xs font-bold text-brand-800">
+                            <i data-lucide="message-square" class="w-4 h-4"></i>
+                            Phản hồi từ Cán bộ quản lý:
+                        </div>
+                        @if (!string.IsNullOrEmpty(Model.AdminFeedback))
+                        {
+                            <p class="text-xs text-slate-700 leading-relaxed">@Model.AdminFeedback</p>
+                        }
+                        @if (!string.IsNullOrEmpty(Model.ResultNote))
+                        {
+                            <p class="text-xs text-slate-700 leading-relaxed font-medium bg-white/70 p-2.5 rounded-lg border border-blue-100">
+                                <strong>Kết quả:</strong> @Model.ResultNote
+                            </p>
+                        }
+                    </div>
+                }
+
+                <!-- Status Timeline Stepper -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-4 h-4 text-brand-600"></i>
+                        Lịch sử tiến trình xử lý
+                    </h3>
+
+                    <div class="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
+                        @foreach (var log in Model.Logs)
+                        {
+                            <div class="relative">
+                                <div class="absolute -left-6 top-1 w-5 h-5 rounded-full bg-brand-500 text-white flex items-center justify-center ring-4 ring-white">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                </div>
+                                <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5">
+                                    <div class="flex items-center justify-between text-xs mb-1">
+                                        <span class="font-bold text-slate-900">@log.Action</span>
+                                        <span class="text-slate-400">@log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                                    </div>
+                                    <div class="text-xs text-slate-600">@log.Note</div>
+                                    <div class="text-[11px] text-slate-400 mt-1">Bởi: @log.ActorName (@log.ActorRole)</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Actions for Student -->
+                @if (Model.Status == RequestStatus.Approved)
+                {
+                    <div class="pt-4 border-t border-slate-200 flex flex-wrap gap-3">
+                        @if (User.IsInRole("Student"))
+                        {
+                            <a asp-controller="Student" asp-action="ViewCertificate" asp-route-id="@Model.Id" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-sm">
+                                <i data-lucide="printer" class="w-4 h-4"></i>
+                                <span>Xem & In giấy xác nhận điện tử</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-sm">
+                                <i data-lucide="log-in" class="w-4 h-4"></i>
+                                <span>Đăng nhập để tải kết quả</span>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-4 shadow-sm">
+                <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+                    <i data-lucide="search-x" class="w-8 h-8"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-900">Không tìm thấy mã hồ sơ: @searchCode</h3>
+                    <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Vui lòng kiểm tra lại chính xác định dạng mã hồ sơ (VD: YC-2026-0001) được cấp khi bạn gửi đơn trực tuyến.</p>
+                </div>
+            </div>
+        }
+    }
+</div>

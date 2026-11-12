@@ -1,0 +1,87 @@
+@model List<StudentAdminPortal.Models.Procedure>
+@{
+    ViewData["Title"] = "Quản lý danh mục thủ tục hành chính";
+}
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Danh Mục Quy Trình & Thủ Tục Hành Chính</h1>
+            <p class="text-xs text-slate-500 mt-1">Cấu hình thời hạn xử lý, hướng dẫn chuẩn bị giấy tờ và bật/tắt tiếp nhận trực tuyến</p>
+        </div>
+        <a asp-controller="Admin" asp-action="CreateProcedure" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-sm">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Thêm thủ tục mới</span>
+        </a>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                    <tr>
+                        <th class="px-6 py-4">Mã thủ tục</th>
+                        <th class="px-6 py-4">Tên thủ tục & Mô tả</th>
+                        <th class="px-6 py-4">Thời gian xử lý</th>
+                        <th class="px-6 py-4">Hồ sơ đã tiếp nhận</th>
+                        <th class="px-6 py-4">Trạng thái tiếp nhận</th>
+                        <th class="px-6 py-4 text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var proc in Model)
+                    {
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="px-6 py-4 font-mono font-bold text-brand-700 whitespace-nowrap">
+                                @proc.Code
+                            </td>
+                            <td class="px-6 py-4 max-w-md">
+                                <div class="font-bold text-slate-900 text-sm">@proc.Name</div>
+                                <div class="text-[11px] text-slate-400 mt-0.5 line-clamp-2">@proc.Description</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center gap-1 font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    @proc.ProcessingDays ngày làm việc
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap font-bold text-slate-800">
+                                @proc.Requests.Count hồ sơ
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if (proc.IsActive)
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                        Đang mở tiếp nhận
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-200 text-slate-700">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                        Tạm dừng
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-right whitespace-nowrap space-x-2">
+                                <a asp-controller="Admin" asp-action="EditProcedure" asp-route-id="@proc.Id" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">
+                                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                    <span>Sửa</span>
+                                </a>
+
+                                <form asp-controller="Admin" asp-action="ToggleProcedureStatus" asp-route-id="@proc.Id" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg @(proc.IsActive ? "bg-amber-50 text-amber-800 hover:bg-amber-100" : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100") font-bold transition">
+                                        <i data-lucide="@(proc.IsActive ? "pause" : "play")" class="w-3.5 h-3.5"></i>
+                                        <span>@(proc.IsActive ? "Tạm ngưng" : "Kích hoạt")</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

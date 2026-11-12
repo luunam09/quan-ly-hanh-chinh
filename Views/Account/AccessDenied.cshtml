@@ -1,0 +1,23 @@
+@{
+    ViewData["Title"] = "Từ chối truy cập";
+}
+
+<div class="min-h-[60vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full text-center space-y-6">
+        <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto">
+            <i data-lucide="shield-alert" class="w-8 h-8"></i>
+        </div>
+        <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">403 - Quyền Truy Cập Bị Từ Chối</h1>
+            <p class="text-xs text-slate-500 mt-2">Bạn không có quyền truy cập vào phân hệ này với vai trò hiện tại của tài khoản.</p>
+        </div>
+        <div class="flex items-center justify-center gap-3">
+            <a asp-controller="Home" asp-action="Index" class="px-5 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition">
+                Về trang chủ
+            </a>
+            <a asp-controller="Account" asp-action="Login" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white text-xs font-semibold hover:bg-brand-700 transition">
+                Đổi tài khoản khác
+            </a>
+        </div>
+    </div>
+</div>

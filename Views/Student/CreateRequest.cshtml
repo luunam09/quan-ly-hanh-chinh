@@ -1,0 +1,141 @@
+@model StudentAdminPortal.ViewModels.CreateRequestViewModel
+@{
+    ViewData["Title"] = "Gửi yêu cầu hành chính";
+    var proc = Model.Procedure;
+}
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <!-- Breadcrumb & Back -->
+    <div class="flex items-center gap-2 text-xs text-slate-500">
+        <a asp-controller="Student" asp-action="Dashboard" class="hover:text-brand-600">Tổng quan</a>
+        <span>&bull;</span>
+        <a asp-controller="Student" asp-action="Procedures" class="hover:text-brand-600">Thủ tục</a>
+        <span>&bull;</span>
+        <span class="text-slate-900 font-bold">Nộp hồ sơ</span>
+    </div>
+
+    <!-- Procedure Header Card -->
+    <div class="bg-gradient-to-r from-brand-900 to-indigo-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur border border-white/20 text-brand-200 text-xs font-mono font-bold">
+            MÃ THỦ TỤC: @proc?.Code
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">@proc?.Name</h1>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">@proc?.Description</p>
+        <div class="flex items-center gap-4 pt-2 text-xs text-brand-200">
+            <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4"></i> Dự kiến xử lý: @proc?.ProcessingDays ngày làm việc</span>
+            <span>&bull;</span>
+            <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4"></i> Tiếp nhận trực tuyến</span>
+        </div>
+    </div>
+
+    <!-- Required Docs Guidance -->
+    @if (!string.IsNullOrEmpty(proc?.RequiredDocuments))
+    {
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex items-start gap-3">
+            <i data-lucide="info" class="w-5 h-5 text-amber-600 shrink-0 mt-0.5"></i>
+            <div class="space-y-1 text-xs text-amber-900">
+                <div class="font-bold">Hồ sơ và giấy tờ cần chuẩn bị nộp kèm:</div>
+                <div class="whitespace-pre-line text-amber-800 leading-relaxed">@proc.RequiredDocuments</div>
+            </div>
+        </div>
+    }
+
+    <!-- Submission Form -->
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8">
+        <form asp-controller="Student" asp-action="CreateRequest" method="post" enctype="multipart/form-data" class="space-y-6">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ProcedureId" />
+
+            <div class="space-y-4">
+                <div>
+                    <label asp-for="Purpose" class="block text-xs font-bold text-slate-800 mb-1.5">
+                        Lý do / Mục đích làm thủ tục <span class="text-rose-500">*</span>
+                    </label>
+                    <textarea asp-for="Purpose" rows="3" placeholder="Ví dụ: Xin giấy xác nhận sinh viên để hoàn thiện hồ sơ vay vốn Ngân hàng Chính sách xã hội..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" required></textarea>
+                    <span asp-validation-for="Purpose" class="text-[11px] text-rose-600 block mt-1"></span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label asp-for="Quantity" class="block text-xs font-bold text-slate-800 mb-1.5">
+                            Số lượng bản cấp <span class="text-rose-500">*</span>
+                        </label>
+                        <input asp-for="Quantity" type="number" min="1" max="10" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" required />
+                        <span asp-validation-for="Quantity" class="text-[11px] text-rose-600 block mt-1"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="ReceiveMethod" class="block text-xs font-bold text-slate-800 mb-1.5">
+                            Hình thức nhận kết quả <span class="text-rose-500">*</span>
+                        </label>
+                        <select asp-for="ReceiveMethod" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500">
+                            <option value="Digital">File mềm điện tử (Có mã QR & xác thực trực tuyến)</option>
+                            <option value="Office">Nhận bản cứng trực tiếp tại Phòng Một Cửa</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label asp-for="StudentNote" class="block text-xs font-bold text-slate-800 mb-1.5">
+                        Ghi chú thêm cho Cán bộ Một Cửa (Nếu có)
+                    </label>
+                    <input asp-for="StudentNote" placeholder="Ví dụ: Cần gấp trước ngày..., lưu ý bổ sung thông tin..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500" />
+                </div>
+
+                <!-- Attachment Upload Dropzone -->
+                <div class="pt-2">
+                    <label class="block text-xs font-bold text-slate-800 mb-1.5">
+                        Đính kèm giấy tờ minh chứng (Ảnh CCCD, biên lai, đơn mẫu...)
+                    </label>
+
+                    <div class="border-2 border-dashed border-slate-300 hover:border-brand-500 rounded-2xl p-6 text-center transition bg-slate-50/50 hover:bg-slate-50">
+                        <input type="file" asp-for="Attachments" multiple id="fileUploadInput" class="hidden" onchange="updateFileList(this)" />
+                        <label for="fileUploadInput" class="cursor-pointer space-y-2 block">
+                            <div class="w-12 h-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center mx-auto">
+                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                            </div>
+                            <div class="text-xs font-bold text-brand-700 hover:underline">
+                                Nhấp để chọn tệp từ máy tính
+                            </div>
+                            <p class="text-[11px] text-slate-400">
+                                Hỗ trợ: PDF, JPG, PNG, DOCX (Có thể chọn nhiều tệp cùng lúc, tối đa 10MB/tệp)
+                            </p>
+                        </label>
+                    </div>
+
+                    <!-- File list preview -->
+                    <div id="fileListPreview" class="mt-3 space-y-1.5"></div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                <a asp-controller="Student" asp-action="Procedures" class="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-semibold transition">
+                    Hủy bỏ
+                </a>
+                <button type="submit" class="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-sm shadow-brand-500/30 flex items-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Xác nhận & Gửi yêu cầu</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateFileList(input) {
+            const container = document.getElementById('fileListPreview');
+            container.innerHTML = '';
+            if (input.files && input.files.length > 0) {
+                for (let i = 0; i < input.files.length; i++) {
+                    const f = input.files[i];
+                    const item = document.createElement('div');
+                    item.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-100 text-xs text-slate-700';
+                    item.innerHTML = `<span class="font-medium truncate max-w-xs">${f.name}</span> <span class="text-slate-400 font-mono text-[10px]">${(f.size/1024).toFixed(1)} KB</span>`;
+                    container.appendChild(item);
+                }
+            }
+        }
+    </script>
+}
