@@ -169,6 +169,22 @@ public class AccountController : Controller
         }
 
         await _context.SaveChangesAsync();
+
+        // Refresh authentication cookie with updated claims (FullName, etc.)
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Username),
+            new("FullName", user.FullName),
+            new(ClaimTypes.Role, user.Role),
+            new("Faculty", user.Faculty ?? ""),
+            new("ClassName", user.ClassName ?? "")
+        };
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(claimsIdentity));
+
         return RedirectToAction(nameof(Profile));
     }
 
